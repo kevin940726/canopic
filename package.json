@@ -5,7 +5,7 @@
   "author": "Kai Hao <kevin830726@gmail.com>",
   "license": "MIT",
   "scripts": {
-    "install": "node ./src/index.js"
+    "install": "node index.js"
   },
   "dependencies": {
     "babel-eslint": "^10.0.2",
