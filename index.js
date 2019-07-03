@@ -4,14 +4,14 @@ const pkgUp = require('pkg-up');
 
 const CANOPIC_SETTING = process.env.CANOPIC_SETTING || 'default';
 
-function requireSetting(file) {
-  return require(`./templates/${CANOPIC_SETTING}/${file}`);
-}
+let settingPaths;
 
-const eslintrc = requireSetting('.eslintrc.json');
-const huskyrc = requireSetting('.huskyrc.json');
-const lintstagedrc = requireSetting('.lintstagedrc.json');
-const prettierrc = requireSetting('.prettierrc.json');
+try {
+  settingPaths = fs.readdirSync(`./jars/${CANOPIC_SETTING}`);
+} catch (err) {
+  console.error(`Cannot find the "${CANOPIC_SETTING}" jar.`);
+  throw err;
+}
 
 const pkgPath = pkgUp.sync({
   cwd: path.resolve(process.cwd(), '..'),
@@ -19,6 +19,10 @@ const pkgPath = pkgUp.sync({
 
 const pkg = JSON.parse(fs.readFileSync(pkgPath, 'utf8'));
 
-Object.assign(pkg, eslintrc, huskyrc, lintstagedrc, prettierrc);
+settingPaths.map(settingPath => `./jars/${CANOPIC_SETTING}/${settingPath}`)
+  .map(settingPath => require(settingPath))
+  .forEach(override => {
+    override(pkg, pkgPath);
+  });
 
 fs.writeFileSync(pkgPath, JSON.stringify(pkg, null, 2), 'utf8');
